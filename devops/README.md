@@ -38,4 +38,6 @@ to enable external service and get node ip address
 ```azure
 minikube service website-service
 ```
+You can find the architecture here.
 
+![](architecture.png)
