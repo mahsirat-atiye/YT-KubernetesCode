@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: website-deployment
+  labels:
+    app: website
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: website
+  template:
+    metadata:
+      labels:
+        app: website
+    spec:
+      containers:
+        - image: my_website
+          imagePullPolicy: Never
+          name: website
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_USER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgresdb-secret
+                  key: postgress-root-username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresdb-secret
+                  key: postgress-root-password
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: postgresdb-configmap
+                  key: db_host
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: postgresdb-configmap
+                  key: db_name
+            - name: DB_SSL_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: postgresdb-configmap
+                  key: db_ssl_mode
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: postgresdb-configmap
+                  key: db_port
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: website-service
+spec:
+  selector:
+    app: website
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 30000
